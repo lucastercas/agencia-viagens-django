@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ block.super }}{{tour.name}}Create Tour{% endblock %}
+{% block navbar-left %}
+{% include "_navbar.html" with active_link="tours" %}
+{% endblock %}
+
+{% block navbar-right %}
+{% if not user.is_authenticated %}
+<a class="btn btn-default" href="{% url 'accounts:login' %}" role="button">Log in</a>
+<a class="btn btn-primary" href="{% url 'accounts:signup' %}" role="button">Sign up</a>
+{% else %}
+{{ block.super }}
+{% endif %}
+{% endblock %}
+
+{% block splash %}
+{% endblock %}
+
+{% block container %}
+<div class="container" >
+   <form method="post">
+      <div class="form-group" >
+         {% csrf_token %}
+         {% crispy form %}
+         <input type="submit" value="Save" class="btn btn-primary"/>
+      </div>
+   </form>
+</div>
+{% endblock %}

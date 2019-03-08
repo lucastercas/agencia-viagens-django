@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+{{ block.super }}Tours
+{% endblock %}
+
+{% block navbar-left %}
+{% include "_navbar.html" with active_link="tours" %}
+{% endblock %}
+
+{% block navbar-right %}
+{% if not user.is_authenticated %}
+<a class="btn btn-default" href="{% url 'accounts:login' %}" role="button">Log in</a>
+<a class="btn btn-primary" href="{% url 'accounts:signup' %}" role="button">Sign up</a>
+{% else %}
+{{ block.super }}
+{% endif %}
+{% endblock %}
+
+{% block container %}
+<div class="container-fluid">
+   <div class="row" >
+         <div class="col-sm-2 text-center" >
+      <div class="panel panel-default">
+         <div class="panel-heading">
+            <h5>Filters</h5>
+         </div>
+            <form type="get" action=".">
+               <div class="panel-body">
+               <p><input type="text" id="search_name" name="search_name" placeholder="Search by Name" class="form-control"/></p>
+               <p><input type="text" id="search_value" name="search_value" placeholder="Search by Value" class="form-control"/></p>
+               </div>
+               <div class="panel-footer">
+               <p><button type="submit" id="search_name"  class="btn btn-primary">
+                     Search <span class="glyphicon glyphicon-search"></span>
+                  </button>
+               </p>
+               </div>
+            </form>
+         </div>
+      </div>
+      <div class="col-sm-10 text-center" >
+         <div class="panel panel-default" >
+            <div class="panel-heading"> <h1>Tours: </h1> </div>
+            <ul class="list-group">
+               <div class="panel-body">
+                  <div class="col-sm-12">
+                     {% for tour in tour_list %}
+                     <div class="col-sm-6">
+                        <a href="{% url 'tours:tour' tour.id %}" class="list-group-item">
+                           <h2>{{tour.name}}</h2>
+                           <p><b>Price:</b> R$ {{tour.value_adult}}</p>
+                           <p><b>Begin:</b> {{ tour.begin_date }} <b>End:</b> {{ tour.end_date }}</p>
+                        </a>
+                     </div>
+                     {% empty %}
+                     <li class="list-group-item"><p>No tours</p></li>
+                     {% endfor %}
+                  </div>
+               </div>
+            </ul>
+            {% if user.is_staff %}
+            <div class="panel-footer" >
+               <form class="btn-group"action="{% url 'tours:create_tour' %}" >
+                  <input type="submit" value="Create Tour" class="btn btn-primary"/>
+               </form>
+                  <form class="btn-group"action="#" >
+                     <input type="submit" value="Create Place" class="btn btn-primary"/>
+                  </form>
+            </div>
+               {% endif %}
+         </div>
+      </div>
+   </div>
+</div>
+{% endblock %}

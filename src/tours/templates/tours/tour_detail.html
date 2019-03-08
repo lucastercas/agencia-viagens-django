@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ block.super }}Tour {{ tour.name }}
+{% endblock %}
+
+{% block navbar-left %}
+{% include "_navbar.html" with active_link="tours" %}
+{% endblock %}
+
+{% block navbar-right %}
+{% if not user.is_authenticated %}
+<a class="btn btn-default" href="{% url 'accounts:login' %}" role="button">Log in</a>
+<a class="btn btn-primary" href="{% url 'accounts:signup' %}" role="button">Sign up</a>
+{% else %}
+{{ block.super }}
+{% endif %}
+{% endblock %}
+
+{% block splash %}
+{% endblock %}
+
+{% block container %}
+<div class="container">
+   <div class="panel panel-default" >
+      <div class="panel-heading" >
+         <h2>{{ tour.name }}: </h2>
+      </div>
+      <div class="panel-body">
+         <p><h4>Description:</h4>{{ tour.description }}</p>
+         <p><h4>Begin Date:</h4> {{ tour.begin_date | date }}</p>
+         <p><h4>End Date:</h4> {{ tour.end_date | date }}</p>
+         <p><h4>Price:</h4> {{ tour.value_adult }}</p>
+         <p><h4>Places visited:</h4> </p>
+         <ol>
+            {% for place in tour.places.all %}
+            <li><p>{{ place.name }}</p>
+               {% endfor %}
+         </ol>
+      </div>
+      <div class="panel-footer text-center" >
+      {% if user.is_authenticated %}
+         <button id="reserve" type="button" class="btn btn-primary btn-group" data-toggle="modal" data-target="#modal_reserve">Reserve</button>
+         {% if user.is_staff %}
+         <form class="btn-group" action="{% url 'tours:edit' tour.id %}" method="post">
+            <input type="submit" value="Edit" class="btn btn-primary">
+            {% csrf_token %}
+         </form>
+         <form class="btn-group" action="{% url 'tours:delete' tour.id %}" method="post">
+            <input type="submit" value="Delete" class="btn btn-primary">
+            {% csrf_token %}
+         </form>
+         {% endif %}
+      {% else %}
+         <a class="btn btn-default" href="{% url 'accounts:login' %}" role="button">Log in</a>
+         <a class="btn btn-primary" href="{% url 'accounts:signup' %}" role="button">Sign up</a>
+      {% endif %}
+      </div>
+   </div>
+</div>
+<p id="jqtest"></p>
+<div id="modal_reserve" class="modal fade" role="dialog">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h2 class="modal-title">Reserve {{tour.name}}?</h2>
+         </div>
+         <div class="modal-body">
+            <p><h4>Value of Adult:</h4>R$ {{ tour.value_adult }}</p>
+            <p><h4>Value of Children:</h4>R$ {{ tour.value_children }}</p>
+            <form class="form-inline form-horizontal">
+               <p><h4>Number of passengers:</h4></p>
+               <div class="input-group">
+                  <span class="input-group-addon">Adults:</span>
+                  <input id="but-adult" type="number" class="form-control" placeholder="Adults" />
+               </div>
+               <div class="input-group" >
+                  <span class="input-group-addon">Children:</span>
+                  <input id="but-children" type="number" class="form-control" placeholder="Children" />
+               </div>
+            </form>
+            <div class="checkbox">
+               <label><input type="checkbox" id="buy_flights">Buy Plane Tickets</label>
+            </div>
+            <div style="display:none" id="flights">
+               <p>Flights</p>
+               {% for f in flights %}
+               <p>{{ f }}</p>
+               {% endfor %}
+            </div>
+            <p><h4>Total Price:</h4> <div id="price">R$ {{ tour.price }}</div></p>
+         </div>
+         <div class="modal-footer">
+            <form class="btn-group" action="{% url 'tours:reserve' tour.id%}" method="post">
+               {% csrf_token %}
+               <input type="submit" value="Reserve" class="btn btn-primary">
+            </form>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+         </div>
+      </div>
+   </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+   $(function(){
+      $("input[type='number']").on('click change keyup keydown', function(){
+         value_adult = "{{ tour.value_adult }}" * 1;
+         value_child = "{{ tour.value_children }}" * 1;
+         qnt_adult = $("#but-adult").val();
+         qnt_child = $("#but-children").val();
+         value = value_adult*qnt_adult + value_child*qnt_child
+         $("#price").text("R$ " + value)
+         console.log('children: ', qnt_child);
+         console.log('adults: ', qnt_adult);
+      });
+      $('#buy_flights').click(function(){
+         $('#flights').toggle(this.checked)
+      });
+   });
+</script>
+{% endblock %}
